@@ -1,0 +1,47 @@
+{% extends 'main/base-main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+.notes {
+  overflow-y: scroll;
+  height: 80vh;
+}
+</style>
+
+<div class="container mt-3">
+  <div class="d-flex align-items-center justify-content-between">
+    <h1 class="p-0">Autonote</h1>
+    <div class="dropdown">
+      <button class="btn btn-dark dropdown-toggle" type="button" id="menu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></button>
+      <div class="dropdown-menu" aria-labelledby="menu">
+        <a class="dropdown-item" href="{% url 'create' %}">Create</a>
+        <a class="dropdown-item" href="{% url 'account_logout' %}">Logout</a>
+      </div>
+    </div>  
+  </div>
+  <hr class="m-0">
+</div>
+
+<div class="container-fluid">
+  <div class="row">    
+    <div class="col-5 d-flex align-items-center justify-content-center">
+      <img src="{% static 'img/desk.svg' %}" class="img-fluid w-75" alt="Illustration">
+    </div>
+    <div class="col-7 notes pt-5">
+      {% for note in notes %}
+        <a href="{% url 'detail' id=note.id %}" class="btn d-block">
+          <div class="card mx-auto" style="max-width: 400px">
+            <div class="card-body">
+              <h5 class="card-title">{{note.title}}</h5>
+              <h6 class="card-subtitle text-muted">{{note.last_updated.date}}</h6>
+              <p class="card-text">{{note.content}}</p>
+            </div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

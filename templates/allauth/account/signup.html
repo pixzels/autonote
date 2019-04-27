@@ -1,0 +1,42 @@
+{% extends 'base-auth.html' %}
+{% load socialaccount %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1>Register</h1>
+  <hr>
+</div>
+<div class="container">
+  <div class="row mt-5 d-flex justify-content-center">
+    <div class="col-5">
+      <img src="{% static 'img/auth.svg' %}" class="img-fluid" alt="Illustration">
+    </div>
+    <div class="col-5">
+      <form method="post" class="d-flex flex-column mt-5">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" name="email" required>
+          <small class="form-text text-muted" id="emailHelp">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group">
+          <label for="password1">Password</label>
+          <input type="password" class="form-control" id="password1" placeholder="Password" name="password1" required>
+        </div>
+        <div class="form-group">
+          <label for="password2">Confirm Password</label>
+          <input type="password" class="form-control" id="password2" placeholder="Confirm Password" name="password2" required>
+        </div>
+
+        <input type="submit" class="btn btn-dark" value="Submit">
+        <a href="{% provider_login_url 'google' %}" class="btn btn-light mt-2">Login with Google</a>
+        <a class="btn btn-link mt-4" href="{% url 'account_login' %}">Already have an account?</a>
+      </form> 
+    </div>
+  </div>
+</div>
+
+
+
+{% endblock content %}

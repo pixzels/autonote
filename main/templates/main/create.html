@@ -1,0 +1,293 @@
+{% extends 'main/base-main.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.heading-input {
+    font-weight: 500;
+    line-height: 1.2;
+    font-size: 2.5rem;
+    color: #212529;
+    border: none;
+}
+
+.CodeMirror {
+  border: none;
+}
+
+.svg {
+  width: 20px;
+  height: 20px;
+}
+
+.editor-toolbar {
+  border: none;
+}
+
+.no-focus:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.CodeMirror {
+  overflow-y: scroll;
+  height: 50vh;
+}
+</style>
+
+<div class="container-fluid mt-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">New note</li>
+    </ol>
+  </nav>
+  <div class="alert alert-warning alert-dismissible fade" role="alert">
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-5 d-flex align-items-center border-right justify-content-center">
+      <img src="{% static 'img/typewriter.svg' %}" class="img-fluid w-75" alt="Illustration">
+    </div>
+
+    <div class="col-7">
+      <div class="d-flex justify-content-end align-items-center">
+        <button class="btn no-focus p-1" id="save-btn">
+          <img src="{% static 'img/save.svg' %}" class="svg" alt="Save">
+        </button>
+        <button class="btn no-focus p-1" id="summarize-btn">
+          <img src="{% static 'img/summarize.svg' %}" class="svg" alt="Summarize">
+        </button>
+        <button class="btn no-focus p-1" id="mic-btn">
+          <img src="{% static 'img/mic.svg' %}" class="svg" alt="Microphone">
+        </button>         
+        <button class="btn no-focus p-1" id="link-btn">
+          <img src="{% static 'img/link.svg' %}" class="svg" alt="Link">
+        </button>         
+      </div>
+
+
+      <form class="d-flex flex-column" method="POST"> 
+        {% csrf_token %}
+        <div class="form-group">
+          <input type="text" class="form-control heading-input no-focus" id="title" name="title" required autocomplete="off" placeholder="Untitled">
+        </div>
+        <div class="form-group">
+          <textarea class="form-control" id="editor" name="editor">Type here...</textarea>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+  
+<script src="https://cdn.jsdelivr.net/highlight.js/latest/highlight.min.js"></script>
+<script>
+var final_transcript = "";
+var recognizing = false;
+var ignore_onend;
+var start_timestamp;
+
+var simplemde = new SimpleMDE({
+  element: $("#editor")[0],
+  autofocus: true,
+  renderingConfig: {
+    codeSyntaxHighlighting: true
+  }
+});
+
+function display_error(m) {
+  $(".alert").addClass("show");
+  $(".alert").html(`
+    ${m}
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  `);
+}
+
+if (!("webkitSpeechRecognition" in window)) {
+  display_error(`Web Speech API is not supported by this browser. Upgrade to <a href="//www.google.com/chrome">Chrome</a> version 25 or later.`);
+} else {
+  var recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onstart = function() {
+    recognizing = true;
+  };
+
+  recognition.onerror = function(event) {
+    if (event.error == "no-speech") {
+      display_error(
+        'No speech was detected. You may need to adjust your <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892" class="alert-link"> microphone settings</a>'
+      );
+      ignore_onend = true;
+    }
+    if (event.error == "audio-capture") {
+      display_error(
+        'No microphone was found. Ensure that a microphone is installed and that <a href="//support.google.com/chrome/bin/answer.py?hl=en&amp;answer=1407892" class="alert-link"> microphone settings</a> are configured correctly.'
+      );
+      ignore_onend = true;
+    }
+    if (event.error == "not-allowed") {
+      if (event.timeStamp - start_timestamp < 100) {
+        display_error(
+          'Permission to use microphone is blocked. To change, go to <a href="chrome://settings/contentExceptions#media-stream" class="alert-link">chrome://settings/contentExceptions#media-stream</a>.'
+        );
+      } else {
+        display_error("Permission to use microphone was denied.");
+      }
+      ignore_onend = true;
+    }
+  };
+
+  recognition.onend = function() {
+    recognizing = false;
+    if (ignore_onend) {
+      return;
+    }
+    //if (window.getSelection) {
+    //  window.getSelection().removeAllRanges();
+    //  var range = document.createRange();
+    //  range.selectNode(document.getElementById("final_span"));
+    //  window.getSelection().addRange(range);
+    //}
+  };
+  recognition.onresult = function(event) {
+    var interim_transcript = "";
+    for (var i = event.resultIndex; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        final_transcript += event.results[i][0].transcript;
+        simplemde.value(initial_content + final_transcript)
+      } else {
+        interim_transcript += event.results[i][0].transcript;
+        simplemde.value(initial_content + final_transcript + linebreak(interim_transcript))
+      }
+    }
+    final_transcript = capitalize(final_transcript);
+    final_transcript = linebreak(final_transcript);
+  };
+
+
+  function linebreak(s) {
+    return s.replace(/\n\n/g, "<p></p>").replace(/\n/g, "<br>");
+  }
+  function capitalize(s) {
+    return s.replace(/\S/, function(m) {
+      return m.toUpperCase();
+    });
+  }
+
+  function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      var cookies = document.cookie.split(";");
+      for (var i = 0; i < cookies.length; i++) {
+        var cookie = cookies[i].trim();
+        // Does this cookie string begin with the name we want?
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  var csrftoken = getCookie("csrftoken");
+
+  function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return /^(GET|HEAD|OPTIONS|TRACE)$/.test(method);
+  }
+  $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+      if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+      }
+    }
+  });
+
+  $("#save-btn").click(function() {
+    $.ajax({
+      url: "{% url 'create' %}",
+      type: "POST",
+      data: {
+        editor: simplemde.value(),
+        title: $("#title").val()
+      },
+      success: function(res) {
+        window.location.href = "/";
+      },
+      error: function(e) {
+        display_error("Something went wrong. Please try again");
+      }
+    });
+  });
+
+  $("#summarize-btn").click(function() {
+    var content = simplemde.value();
+    var n = Number(prompt("How many atmost lines of summary do you want?"));
+    simplemde.value("Compressing...");
+
+    $.ajax({
+      url: "{% url 'summarize' %}",
+      type: "POST",
+      data: {
+        editor: content,
+        n: n
+      },
+      success: function(res) {
+        simplemde.value(res);
+      },
+      error: function(e) {
+        simplemde.value(content);
+        display_error("Something went wrong. Please try again");
+      }
+    });
+  });
+
+  $("#mic-btn").click(function(event) {
+    $("#mic-btn img").attr("src","{% static 'img/mic-active.svg' %}");
+    if (recognizing) {
+      recognition.stop();
+      $("#mic-btn img").attr("src","{% static 'img/mic.svg' %}");
+      return;
+    }
+    final_transcript = "";
+    initial_content = simplemde.value()
+    recognition.start();
+    ignore_onend = false;
+    start_timestamp = event.timeStamp;
+  });
+
+  $("#link-btn").click(function() {
+    var content = simplemde.value();
+    var link = prompt("Enter url");
+    var n = Number(prompt("About how many summarized lines you want?"));
+    simplemde.value("Extracting page...");
+
+    $.ajax({
+      url: "{% url 'summarize' %}",
+      type: "POST",
+      data: {
+        url: link,
+        n: n
+      },
+      success: function(res) {
+        simplemde.value(res);
+      },
+      error: function(e) {
+        simplemde.value(content);
+        display_error("Something went wrong. Please try again");
+      }
+    });
+  });
+
+}
+</script>
+
+{% endblock content %}

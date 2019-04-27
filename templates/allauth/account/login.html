@@ -1,0 +1,41 @@
+{% extends "base-auth.html" %}
+{% load socialaccount %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+  <h1>Login</h1>
+  <hr>
+</div>
+
+<div class="container">
+  <div class="row mt-5 d-flex justify-content-center">
+    <div class="col-5">
+      <img src="{% static 'img/auth.svg' %}" class="img-fluid" alt="Illustration">
+    </div>
+    <div class="col-5">
+      <form method="post" class="d-flex flex-column mt-5">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" name="login" required>
+          <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
+        </div>
+        <div class="form-group form-check">
+          <input type="checkbox" class="form-check-input" id="remember" name="remember">
+          <label class="form-check-label" for="remember">Remember me </label>
+        </div>
+        <input type="submit" class="btn btn-dark" value="Submit"/>
+        <a href="{% provider_login_url 'google' %}" class="btn btn-light mt-2">Login with Google</a>
+        <a class="btn btn-link mt-4" href="{% url 'account_signup' %}">Create an account</a>
+      </form> 
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
