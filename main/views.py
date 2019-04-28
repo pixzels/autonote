@@ -3,35 +3,36 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Note
 from django.shortcuts import render, redirect
 import requests
-from django.http import JsonResponse, HttpResponseServerError
+from django.http import JsonResponse
 import json
+from django.conf import settings
 
 
 class HomePageView(LoginRequiredMixin, TemplateView):
     template_name = 'main/home.html'
 
-    def get_context_data(self, *args, **kwargs):
-        context = super(HomePageView, self).get_context_data(*args, **kwargs)
+    def get(self, request, *args, **kwargs):
         query_set = Note.objects.filter(
             user=self.request.user).order_by('-last_updated')
         notes = []
         for note in query_set:
-            note.content = note.content[:100] + '...'
+            note.content = note.content[:100] + '...' if note.content else ''
             notes.append(note)
-        context['notes'] = notes
-        return context
+
+        return render(request, self.template_name, {'notes': notes})
 
 
 class CreateView(LoginRequiredMixin, TemplateView):
     template_name = 'main/create.html'
 
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-
     def post(self, request, *args, **kwargs):
-        note = Note(title=request.POST['title'],
-                    content=request.POST['editor'], user=request.user)
-        note.save()
+        title, editor = request.POST.get(
+            'title', ''), request.POST.get('editor', '')
+
+        note = Note(title=title,
+                    content=editor, user=request.user)
+        if title:
+            note.save()
         return redirect('home')
 
 
@@ -43,10 +44,10 @@ class DetailView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, *args, **kwargs):
         note = Note.objects.get(pk=self.kwargs['id'])
-        note.content = request.POST['editor']
-        note.title = request.POST['title']
-        print(note.content)
-        note.save()
+        note.content = request.POST.get('editor', '')
+        note.title = request.POST.get('title', '')
+        if note.title:
+            note.save()
         return redirect('home')
 
 
@@ -58,10 +59,11 @@ class DeleteView(LoginRequiredMixin, TemplateView):
 
 
 class SummarizeView(LoginRequiredMixin, TemplateView):
+
     def post(self, request, *args, **kwargs):
         headers = {
-            "X-RapidAPI-Host": os.environ.get('RAPIDAPI_HOST', ''),
-            "X-RapidAPI-Key": os.environ.get('RAPIDAPI_KEY', ''),
+            "X-RapidAPI-Host": settings.RAPIDAPI_HOST,
+            "X-RapidAPI-Key": settings.RAPIDAPI_KEY,
             "Content-Type": "application/json"
         }
         data = {

@@ -12,20 +12,34 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 import dj_database_url
 import django_heroku
+import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
+env = environ.Env(
+    SECRET_KEY=(str, 'y#7@a@19vf@6nk^h-qyo2$zhlfvej3qp%-vz8pemu#qh8-9n&4'),
+    DEBUG=(bool, False),
+    RAPIDAPI_HOST=str,
+    RAPIDAPI_KEY=str
+)
+
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "y#7@a@19vf@6nk^h-qyo2$zhlfvej3qp%-vz8pemu#qh8-9n&4"
+SECRET_KEY = env('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
+
+# API keys
+RAPIDAPI_HOST = env('RAPIDAPI_HOST')
+RAPIDAPI_KEY = env('RAPIDAPI_KEY')
 
 # Application definition
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -55,12 +69,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 SITE_ID = 1
-
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-
-
-AUTH_USER_MODEL = 'main.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -137,7 +145,7 @@ DATABASES['default'].update(dj_database_url.config(
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Allow all host headers
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['127.0.0.1', 'app-autonote.herokuapp.com']
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
@@ -149,7 +157,6 @@ STATIC_URL = '/static/'
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, 'static'),
-
 ]
 # Simplified static file serving.
 # https://warehouse.python.org/project/whitenoise/
@@ -158,9 +165,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Activate Django-Heroku.
 django_heroku.settings(locals())
 
-ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+AUTH_USER_MODEL = 'main.User'
+
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 LOGIN_REDIRECT_URL = '/'
