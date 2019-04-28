@@ -4,33 +4,36 @@
 
 {% block content %}
 
-<div class="container mt-5">
-  <h1>Login</h1>
-  <hr>
+<div class="container mt-3">
+  <div class="d-flex align-items-center justify-content-between">
+    <h1 class="p-0">Autonote</h1> 
+  </div>
+  <hr class="m-0">
 </div>
 
-<div class="container">
-  <div class="row mt-5 d-flex justify-content-center">
-    <div class="col-5">
-      <img src="{% static 'img/auth.svg' %}" class="img-fluid" alt="Illustration">
+<div class="container-fluid" style="margin-top: 100px">
+  <div class="row">
+    <div class="col-5 d-flex align-items-center justify-content-end">
+      <img src="{% static 'img/fingerprint.svg' %}" class="img-fluid w-75" alt="Illustration">
     </div>
-    <div class="col-5">
-      <form method="post" class="d-flex flex-column mt-5">
+    <div class="col-7 d-flex justify-content-center">
+      <form method="post" class="d-flex flex-column w-75">
         {% csrf_token %}
         <div class="form-group">
           <label for="email">Email address</label>
           <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" name="login" required>
           <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
         </div>
+    
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" class="form-control" id="password" placeholder="Password" name="password" required>
         </div>
         <div class="form-group form-check">
           <input type="checkbox" class="form-check-input" id="remember" name="remember">
-          <label class="form-check-label" for="remember">Remember me </label>
+          <label class="form-check-label" for="remember">Remember me</label>
         </div>
-        <input type="submit" class="btn btn-dark" value="Submit"/>
+        <input type="submit" class="btn btn-dark" value="Login"/>
         <a href="{% provider_login_url 'google' %}" class="btn btn-light mt-2">Login with Google</a>
         <a class="btn btn-link mt-4" href="{% url 'account_signup' %}">Create an account</a>
       </form> 
