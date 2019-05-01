@@ -143,6 +143,8 @@ DATABASES['default'].update(dj_database_url.config(
 
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = True
+
 # Allow all host headers
 
 ALLOWED_HOSTS = ['127.0.0.1', 'app-autonote.herokuapp.com']
