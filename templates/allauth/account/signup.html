@@ -13,11 +13,26 @@
 
 <div class="container-fluid" style="margin-top: 100px">
   <div class="row">
-    <div class="col-5 d-flex align-items-center justify-content-end">
+    <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center mb-5">
       <img src="{% static 'img/fingerprint.svg' %}" class="img-fluid w-75" alt="Illustration">
     </div>
-    <div class="col-7 d-flex justify-content-center">
+    <div class="col-sm-12 col-md-7 d-flex justify-content-center">
       <form method="post" class="d-flex flex-column w-75">
+        {% if form.errors %}
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p class="text-danger">
+                {{ error|escape }}
+              </p>
+            {% endfor %}
+          {% endfor %}
+        
+          {% for error in form.non_field_errors %}
+            <p class="text-danger">
+              {{ error|escape }}
+            </p>
+          {% endfor %}
+        {% endif %}
         {% csrf_token %}
         <div class="form-group">
           <label for="email">Email address</label>

@@ -30,7 +30,7 @@
     </div>
     <div class="col-7 notes pt-5">
       {% for note in notes %}
-        <a href="{% url 'detail' id=note.id %}" class="btn d-block">
+        <a href="{% url 'detail' id=note.id %}" class="btn">
           <div class="card mx-auto" style="max-width: 400px">
             <div class="card-body">
               <h5 class="card-title">{{note.title}}</h5>
