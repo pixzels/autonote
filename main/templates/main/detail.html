@@ -50,11 +50,11 @@
 
 <div class="container-fluid">
   <div class="row">
-    <div class="col-5 d-flex align-items-center border-right justify-content-center">
+    <div class="col-sm-12 col-md-5 d-flex align-items-center border-right justify-content-center mb-5">
       <img src="{% static 'img/typewriter.svg' %}" class="img-fluid w-75" alt="Illustration">
     </div>
 
-    <div class="col-7">
+    <div class="col-sm-12 col-md-7">
       <div class="d-flex justify-content-end align-items-center">
         <button class="btn no-focus p-1" id="save-btn">
           <img src="{% static 'img/save.svg' %}" class="svg" alt="Save">
@@ -99,6 +99,7 @@ var start_timestamp;
 var simplemde = new SimpleMDE({
   element: $("#editor")[0],
   autofocus: true,
+  placeholder: "Write something here (Markdown supported)...",
   renderingConfig: {
     codeSyntaxHighlighting: true
   }

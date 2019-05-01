@@ -25,10 +25,10 @@
 
 <div class="container-fluid">
   <div class="row">    
-    <div class="col-5 d-flex align-items-center justify-content-center">
+    <div class="col-sm-12 col-md-5 d-flex align-items-center justify-content-center mb-5 mt-5">
       <img src="{% static 'img/desk.svg' %}" class="img-fluid w-75" alt="Illustration">
     </div>
-    <div class="col-7 notes pt-5">
+    <div class="col-sm-12 col-md-7 notes pt-5">
       {% for note in notes %}
         <a href="{% url 'detail' id=note.id %}" class="btn">
           <div class="card mx-auto" style="max-width: 400px">
